@@ -248,7 +248,7 @@ export default function Home() {
       </div>
 
       <footer className="text-center text-zinc-500 mt-16 text-sm">
-        © {new Date().getFullYear()} © 2012 - 2026. Rocky Mountain Robotics. All rights reserved.
+        © {new Date().getFullYear()} Rocky Mountain Robotics. All rights reserved.
       </footer>
     </div>
   );
