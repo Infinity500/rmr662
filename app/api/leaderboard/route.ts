@@ -4,17 +4,19 @@ import { NextResponse } from "next/server";
 const BLOB_NAME = "leaderboard.json";
 
 export async function GET() {
-  // Check if blob exists
   const files = await list();
   const exists = files.blobs.find((b) => b.pathname === BLOB_NAME);
 
   if (!exists) {
     const defaultData = {
       departments: [
-        { name: "Mechanical", points: 500 },
-        { name: "Electrical", points: 500 },
+        { name: "Manipulator", points: 500 },
+        { name: "Mobility", points: 500 },
         { name: "Programming", points: 500 },
-        { name: "CAD", points: 500 }
+        { name: "CAD", points: 500 },
+        { name: "Wiring", points: 500 },
+        { name: "Special Projects", points: 500 },
+        { name: "Media", points: 500 },
       ]
     };
 
