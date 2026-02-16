@@ -8,7 +8,7 @@ type Department = {
   points: number;
 };
 
-const ADMIN_PASSWORD = "roboticsSafety123";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -87,7 +87,7 @@ export default function Home() {
           priority
         />
         <h1 className="text-4xl sm:text-5xl font-extrabold text-center bg-gradient-to-r from-yellow-400 to-blue-400 bg-clip-text text-transparent">
-          Robotics Safety Leaderboard
+          Safety Leaderboard
         </h1>
         <p className="text-zinc-400 mt-2">Rocky Mountain Robotics Safety Tracking System</p>
       </div>
@@ -248,7 +248,7 @@ export default function Home() {
       </div>
 
       <footer className="text-center text-zinc-500 mt-16 text-sm">
-        © {new Date().getFullYear()} 662 Robotics — Built for Safety Excellence
+        © {new Date().getFullYear()} © 2012 - 2026. Rocky Mountain Robotics. All rights reserved.
       </footer>
     </div>
   );
