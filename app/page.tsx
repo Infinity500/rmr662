@@ -1,21 +1,27 @@
 "use client";
+
 import { useState } from "react";
+
+type Department = {
+  name: string;
+  points: number;
+};
 
 export default function Home() {
   const ADMIN_PASSWORD = "roboticsSafety123"; // move to env later
 
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [passwordInput, setPasswordInput] = useState("");
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [passwordInput, setPasswordInput] = useState<string>("");
 
-  const [departments, setDepartments] = useState([
+  const [departments, setDepartments] = useState<Department[]>([
     { name: "Mechanical", points: 500 },
     { name: "Electrical", points: 500 },
     { name: "Programming", points: 500 },
     { name: "CAD", points: 500 },
   ]);
 
-  const [incidentLog, setIncidentLog] = useState([]);
-  const [incidentText, setIncidentText] = useState("");
+  const [incidentLog, setIncidentLog] = useState<string[]>([]);
+  const [incidentText, setIncidentText] = useState<string>("");
 
   const handleLogin = () => {
     if (passwordInput === ADMIN_PASSWORD) {
@@ -25,13 +31,17 @@ export default function Home() {
     }
   };
 
-  const updatePoints = (index, amount, description) => {
+  const updatePoints = (
+    index: number,
+    amount: number,
+    description: string
+  ) => {
     const updated = [...departments];
     updated[index].points += amount;
     setDepartments(updated);
 
-    setIncidentLog([
-      ...incidentLog,
+    setIncidentLog((prev) => [
+      ...prev,
       `${updated[index].name}: ${description} (${amount > 0 ? "+" : ""}${amount})`,
     ]);
   };
@@ -123,8 +133,10 @@ export default function Home() {
           />
           <button
             onClick={() => {
-              setIncidentLog([...incidentLog, incidentText]);
-              setIncidentText("");
+              if (incidentText.trim().length > 0) {
+                setIncidentLog((prev) => [...prev, incidentText]);
+                setIncidentText("");
+              }
             }}
             className="mt-3 w-full bg-blue-600 text-white py-2 rounded"
           >
