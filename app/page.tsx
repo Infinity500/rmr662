@@ -8,7 +8,7 @@ type Department = {
   points: number;
 };
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
 
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
