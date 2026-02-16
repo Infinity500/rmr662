@@ -89,7 +89,7 @@ export default function Home() {
         <h1 className="text-4xl sm:text-5xl font-extrabold text-center bg-gradient-to-r from-yellow-400 to-blue-400 bg-clip-text text-transparent">
           Robotics Safety Leaderboard
         </h1>
-        <p className="text-zinc-400 mt-2">662.gg Safety Tracking System</p>
+        <p className="text-zinc-400 mt-2">Rocky Mountain Robotics Safety Tracking System</p>
       </div>
 
       {/* Leaderboard */}
