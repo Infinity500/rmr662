@@ -1,4 +1,4 @@
-import { put, list, get } from "@vercel/blob";
+import { put, list } from "@vercel/blob";
 import { NextResponse } from "next/server";
 
 const BLOB_NAME = "leaderboard.json";
@@ -9,7 +9,6 @@ export async function GET() {
   const exists = files.blobs.find((b) => b.pathname === BLOB_NAME);
 
   if (!exists) {
-    // Default leaderboard
     const defaultData = {
       departments: [
         { name: "Mechanical", points: 500 },
@@ -27,10 +26,8 @@ export async function GET() {
     return NextResponse.json(defaultData);
   }
 
-  // Read existing blob
-  const file = await get(BLOB_NAME);
-  const data = await fetch(file.url).then((r) => r.json());
-
+  // Fetch the blob contents
+  const data = await fetch(exists.url).then((r) => r.json());
   return NextResponse.json(data);
 }
 
