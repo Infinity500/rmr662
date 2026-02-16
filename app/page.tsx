@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type Department = {
   name: string;
@@ -12,16 +13,13 @@ const ADMIN_PASSWORD = "roboticsSafety123";
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
-
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [customAmount, setCustomAmount] = useState<Record<string, string>>({});
   const [customDescription, setCustomDescription] = useState<
     Record<string, string>
   >({});
 
-  // Load leaderboard from backend
   useEffect(() => {
     const load = async () => {
       const res = await fetch("/api/leaderboard");
@@ -48,9 +46,7 @@ export default function Home() {
   ) => {
     const updated = [...departments];
     updated[index].points += amount;
-
     updated.sort((a, b) => b.points - a.points);
-
     sync(updated);
   };
 
@@ -71,36 +67,56 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Loading...
+      <div className="min-h-screen flex items-center justify-center bg-black text-yellow-400 text-xl">
+        Loading Safety System...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-100 dark:bg-black text-black dark:text-white p-6 sm:p-10">
-      <h1 className="text-4xl font-bold text-center mb-10">
-        Robotics Safety Leaderboard
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 via-black to-yellow-900 text-white p-6 sm:p-10 animate-fadeIn">
+      
+      {/* Header */}
+      <div className="flex flex-col items-center mb-14">
+        <Image
+          src="/RoboticsLogo.png"
+          alt="Team 662 Robotics Logo"
+          width={140}
+          height={140}
+          className="mb-4 drop-shadow-[0_0_25px_rgba(255,255,0,0.6)]"
+          priority
+        />
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-center bg-gradient-to-r from-yellow-400 to-blue-400 bg-clip-text text-transparent">
+          Robotics Safety Leaderboard
+        </h1>
+        <p className="text-zinc-400 mt-2">662.gg Safety Tracking System</p>
+      </div>
 
       {/* Leaderboard */}
-      <div className="max-w-3xl mx-auto bg-white dark:bg-zinc-900 p-6 rounded-xl shadow">
-        <h2 className="text-2xl font-semibold mb-4">Leaderboard</h2>
+      <div className="max-w-4xl mx-auto bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
+        <h2 className="text-2xl font-semibold mb-6 text-yellow-400">
+          Leaderboard
+        </h2>
 
-        <table className="w-full">
+        <table className="w-full text-center">
           <thead>
-            <tr className="border-b border-zinc-700">
-              <th className="py-2">Rank</th>
-              <th className="py-2">Department</th>
-              <th className="py-2">Points</th>
+            <tr className="border-b border-yellow-500/30 text-yellow-400 uppercase text-sm tracking-wider">
+              <th className="py-3">Rank</th>
+              <th className="py-3">Department</th>
+              <th className="py-3">Points</th>
             </tr>
           </thead>
           <tbody>
             {departments.map((d, i) => (
-              <tr key={d.name} className="border-b border-zinc-800">
-                <td className="py-2">{i + 1}</td>
-                <td className="py-2">{d.name}</td>
-                <td className="py-2 font-semibold">{d.points}</td>
+              <tr
+                key={d.name}
+                className="border-b border-white/5 hover:bg-white/5 transition"
+              >
+                <td className="py-3 font-bold text-blue-400">{i + 1}</td>
+                <td className="py-3">{d.name}</td>
+                <td className="py-3 font-bold text-yellow-300">
+                  {d.points}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -109,11 +125,13 @@ export default function Home() {
 
       {/* Admin Login */}
       {!isAdmin && (
-        <div className="max-w-md mx-auto mt-10">
-          <h3 className="text-xl font-semibold mb-2">Admin Login</h3>
+        <div className="max-w-md mx-auto mt-14 bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl shadow-xl">
+          <h3 className="text-xl font-semibold mb-3 text-blue-400">
+            Admin Login
+          </h3>
           <input
             type="password"
-            className="w-full p-2 rounded bg-zinc-200 dark:bg-zinc-800"
+            className="w-full p-2 rounded bg-black/50 border border-white/20"
             placeholder="Enter password"
             value={passwordInput}
             onChange={(e) => setPasswordInput(e.target.value)}
@@ -124,7 +142,7 @@ export default function Home() {
                 ? setIsAdmin(true)
                 : alert("Wrong password")
             }
-            className="mt-3 w-full bg-blue-600 text-white py-2 rounded"
+            className="mt-3 w-full bg-gradient-to-r from-blue-600 to-yellow-500 py-2 rounded font-semibold hover:opacity-90 transition"
           >
             Login
           </button>
@@ -133,16 +151,22 @@ export default function Home() {
 
       {/* Admin Controls */}
       {isAdmin && (
-        <div className="max-w-3xl mx-auto mt-10 bg-white dark:bg-zinc-900 p-6 rounded-xl shadow">
-          <h2 className="text-2xl font-semibold mb-4">Admin Controls</h2>
+        <div className="max-w-4xl mx-auto mt-14 bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
+          <h2 className="text-2xl font-semibold mb-6 text-blue-400">
+            Admin Controls
+          </h2>
 
           {departments.map((dept, i) => (
-            <div key={dept.name} className="mb-6 border-b border-zinc-800 pb-4">
-              <h3 className="text-lg font-medium mb-2">
-                {dept.name} — {dept.points} pts
+            <div
+              key={dept.name}
+              className="mb-6 border-b border-white/10 pb-6"
+            >
+              <h3 className="text-lg font-medium mb-3">
+                {dept.name} —{" "}
+                <span className="text-yellow-400">{dept.points} pts</span>
               </h3>
 
-              <div className="flex gap-2 mb-3">
+              <div className="flex gap-2 mb-3 flex-wrap">
                 <button
                   onClick={() => applyChange(i, -50, "Minor incident")}
                   className="bg-red-600 px-3 py-1 rounded text-sm"
@@ -167,7 +191,7 @@ export default function Home() {
                 <input
                   type="number"
                   placeholder="Custom points"
-                  className="p-2 rounded bg-zinc-200 dark:bg-zinc-800 text-sm"
+                  className="p-2 rounded bg-black/50 border border-white/20 text-sm"
                   value={customAmount[dept.name] || ""}
                   onChange={(e) =>
                     setCustomAmount((p) => ({
@@ -179,7 +203,7 @@ export default function Home() {
                 <input
                   type="text"
                   placeholder="Description"
-                  className="p-2 rounded bg-zinc-200 dark:bg-zinc-800 text-sm"
+                  className="p-2 rounded bg-black/50 border border-white/20 text-sm"
                   value={customDescription[dept.name] || ""}
                   onChange={(e) =>
                     setCustomDescription((p) => ({
@@ -190,7 +214,7 @@ export default function Home() {
                 />
                 <button
                   onClick={() => handleCustom(dept.name, i)}
-                  className="px-4 py-2 bg-blue-600 rounded text-sm text-white"
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-yellow-500 rounded text-sm font-semibold"
                 >
                   Apply
                 </button>
@@ -200,17 +224,32 @@ export default function Home() {
         </div>
       )}
 
-      {/* Google Sheets Embed */}
-      <div className="max-w-3xl mx-auto mt-10 bg-white dark:bg-zinc-900 p-6 rounded-xl shadow">
-        <h2 className="text-2xl font-semibold mb-4">Incident Log</h2>
+      {/* Incident Log */}
+      <div className="max-w-5xl mx-auto mt-16">
+        <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-semibold text-yellow-400">
+              Incident Log
+            </h2>
+            <span className="text-sm text-zinc-400">
+              Live Google Sheets Feed
+            </span>
+          </div>
 
-        <iframe
-          src="https://docs.google.com/spreadsheets/d/e/2PACX-1vR-yD4WEKawoutTLeDBKS9oFg5TJNyAdm9HmOhtVEqyWhnTNFCbGu-hFNEQxFDoCiGAZTZ8MliuIqjn/pubhtml?widget=true&headers=false"
-          width="100%"
-          height="600"
-          className="rounded-lg border border-zinc-300 dark:border-zinc-700"
-        />
+          <div className="rounded-xl overflow-hidden border border-yellow-500/30 shadow-inner">
+            <iframe
+              src="https://docs.google.com/spreadsheets/d/e/2PACX-1vR-yD4WEKawoutTLeDBKS9oFg5TJNyAdm9HmOhtVEqyWhnTNFCbGu-hFNEQxFDoCiGAZTZ8MliuIqjn/pubhtml?widget=true&headers=false"
+              width="100%"
+              height="500"
+              className="bg-white"
+            />
+          </div>
+        </div>
       </div>
+
+      <footer className="text-center text-zinc-500 mt-16 text-sm">
+        © {new Date().getFullYear()} 662 Robotics — Built for Safety Excellence
+      </footer>
     </div>
   );
 }
