@@ -76,7 +76,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-950 via-black to-yellow-900 text-white p-6 sm:p-10 animate-fadeIn">
       
-      {/* Header */}
       <div className="flex flex-col items-center mb-14">
         <Image
           src="/RoboticsLogo.png"
@@ -92,7 +91,6 @@ export default function Home() {
         <p className="text-zinc-400 mt-2">Rocky Mountain Robotics Safety Tracking System</p>
       </div>
 
-      {/* Leaderboard */}
       <div className="max-w-4xl mx-auto bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
         <h2 className="text-2xl font-semibold mb-6 text-yellow-400">
           Leaderboard
@@ -123,7 +121,6 @@ export default function Home() {
         </table>
       </div>
 
-      {/* Admin Login */}
       {!isAdmin && (
         <div className="max-w-md mx-auto mt-14 bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl shadow-xl">
           <h3 className="text-xl font-semibold mb-3 text-blue-400">
@@ -149,7 +146,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Admin Controls */}
       {isAdmin && (
         <div className="max-w-4xl mx-auto mt-14 bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
           <h2 className="text-2xl font-semibold mb-6 text-blue-400">
@@ -224,7 +220,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Incident Log */}
       <div className="max-w-5xl mx-auto mt-16">
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
           <div className="flex items-center justify-between mb-4">

@@ -29,7 +29,6 @@ export async function GET() {
     return NextResponse.json(defaultData);
   }
 
-  // Fetch the blob contents
   const data = await fetch(exists.url).then((r) => r.json());
   return NextResponse.json(data);
 }
