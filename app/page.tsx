@@ -66,31 +66,30 @@ export default function Home() {
 
   // Apply change + log infraction
   const applyChange = async (index: number, amount: number, description: string) => {
-    const updated = [...departments];
-    updated[index].points += amount;
-    updated.sort((a, b) => b.points - a.points);
+  const deptName = departments[index].name;   // ⭐ Capture BEFORE sorting
 
-    await sync(updated);
+  const updated = [...departments];
+  updated[index].points += amount;
+  updated.sort((a, b) => b.points - a.points);
 
-    await fetch("/api/infractions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        department: updated[index].name,
-        points: amount,
-        description,
-        password: passwordInput,
-      }),
-    });
+  await sync(updated);
 
-    // Wait for blob write to finish
-    await wait(150);
+  await fetch("/api/infractions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      department: deptName,   // ⭐ Use original department
+      points: amount,
+      description,
+      password: passwordInput,
+    }),
+  });
 
-    const infra = await fetch("/api/infractions").then((r) => r.json());
-    if (infra && Array.isArray(infra.infractions)) {
-      setInfractions([...infra.infractions].reverse());
-    }
-  };
+  await wait(150);
+
+  const infra = await fetch("/api/infractions").then((r) => r.json());
+  setInfractions([...infra.infractions].reverse());
+};
 
   const handleCustom = (dept: string, index: number) => {
     const amount = Number(customAmount[dept]);
