@@ -42,7 +42,8 @@ export default function Home() {
     });
   };
 
-  const applyChange = (
+  // 🔥 Apply change + log infraction
+  const applyChange = async (
     index: number,
     amount: number,
     description: string
@@ -50,7 +51,21 @@ export default function Home() {
     const updated = [...departments];
     updated[index].points += amount;
     updated.sort((a, b) => b.points - a.points);
-    sync(updated);
+
+    // Update leaderboard
+    await sync(updated);
+
+    // Log infraction
+    await fetch("/api/infractions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        department: departments[index].name,
+        points: amount,
+        description,
+        password: passwordInput,
+      }),
+    });
   };
 
   const handleCustom = (dept: string, index: number) => {
@@ -143,7 +158,7 @@ export default function Home() {
       </aside>
 
       {/* ---------- MAIN CONTENT ---------- */}
-      <div className="lg:mr-96"> {/* Leaves space for sidebar */}
+      <div className="lg:mr-96">
 
         {/* Header */}
         <div className="flex flex-col items-center mb-14">
