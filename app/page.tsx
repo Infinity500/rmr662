@@ -8,8 +8,6 @@ type Department = {
   points: number;
 };
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
@@ -30,12 +28,17 @@ export default function Home() {
     load();
   }, []);
 
+  // 🔐 Secure sync — sends password to server
   const sync = async (updated: Department[]) => {
     setDepartments(updated);
+
     await fetch("/api/leaderboard", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ departments: updated }),
+      body: JSON.stringify({
+        departments: updated,
+        password: passwordInput, // required for server auth
+      }),
     });
   };
 
@@ -63,6 +66,25 @@ export default function Home() {
 
     setCustomAmount((p) => ({ ...p, [dept]: "" }));
     setCustomDescription((p) => ({ ...p, [dept]: "" }));
+  };
+
+  // 🔐 Secure login — validated by server
+  const handleLogin = async () => {
+    const res = await fetch("/api/leaderboard", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        password: passwordInput,
+        test: true, // harmless test write
+      }),
+    });
+
+    if (res.status === 401) {
+      alert("Wrong password");
+      return;
+    }
+
+    setIsAdmin(true);
   };
 
   if (loading) {
@@ -134,11 +156,7 @@ export default function Home() {
             onChange={(e) => setPasswordInput(e.target.value)}
           />
           <button
-            onClick={() =>
-              passwordInput === ADMIN_PASSWORD
-                ? setIsAdmin(true)
-                : alert("Wrong password")
-            }
+            onClick={handleLogin}
             className="mt-3 w-full bg-gradient-to-r from-blue-600 to-yellow-500 py-2 rounded font-semibold hover:opacity-90 transition"
           >
             Login
