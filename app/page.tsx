@@ -39,7 +39,7 @@ export default function Home() {
 
       const infra = await fetch("/api/infractions").then((r) => r.json());
       if (infra && Array.isArray(infra.infractions)) {
-        setInfractions(infra.infractions.reverse()); // newest first
+        setInfractions(infra.infractions.reverse());
       }
 
       setLoading(false);
@@ -101,6 +101,25 @@ export default function Home() {
 
     setCustomAmount((p) => ({ ...p, [dept]: "" }));
     setCustomDescription((p) => ({ ...p, [dept]: "" }));
+  };
+
+  // Delete an incident
+  const deleteInfraction = async (index: number) => {
+    if (!confirm("Delete this incident?")) return;
+
+    await fetch("/api/infractions", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        index,
+        password: passwordInput,
+      }),
+    });
+
+    const infra = await fetch("/api/infractions").then((r) => r.json());
+    if (infra && Array.isArray(infra.infractions)) {
+      setInfractions(infra.infractions.reverse());
+    }
   };
 
   // Admin login
@@ -291,8 +310,18 @@ export default function Home() {
               {infractions.map((inf, idx) => (
                 <div
                   key={idx}
-                  className="bg-white/5 border border-white/10 p-4 rounded-xl shadow-sm hover:bg-white/10 transition"
+                  className="relative bg-white/5 border border-white/10 p-4 rounded-xl shadow-sm hover:bg-white/10 transition"
                 >
+                  {/* Admin-only delete button */}
+                  {isAdmin && (
+                    <button
+                      onClick={() => deleteInfraction(idx)}
+                      className="absolute top-2 right-3 text-red-400 hover:text-red-600 text-lg font-bold"
+                    >
+                      ✕
+                    </button>
+                  )}
+
                   <div className="flex justify-between">
                     <span className="font-semibold text-yellow-300">{inf.department}</span>
                     <span className={inf.points < 0 ? "text-red-400" : "text-green-400"}>
