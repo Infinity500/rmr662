@@ -52,7 +52,14 @@ export async function POST(req: Request) {
     );
   }
 
+  // ⭐ Ignore test login requests
+  if (body.test === true) {
+    return NextResponse.json({ ok: true });
+  }
+
+  // Normal update
   delete body.password;
+  delete body.test;
 
   await put(BLOB_NAME, JSON.stringify(body), {
     access: "public",
