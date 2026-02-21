@@ -103,7 +103,6 @@ export default function Home() {
     setCustomDescription((p) => ({ ...p, [dept]: "" }));
   };
 
-  // Delete an incident
   const deleteInfraction = async (index: number) => {
     if (!confirm("Delete this incident?")) return;
 
@@ -312,14 +311,15 @@ export default function Home() {
                   key={idx}
                   className="relative bg-white/5 border border-white/10 p-4 rounded-xl shadow-sm hover:bg-white/10 transition"
                 >
-                  {/* Admin-only delete button */}
                   {isAdmin && (
-                    <button
-                      onClick={() => deleteInfraction(idx)}
-                      className="absolute top-2 right-3 text-red-400 hover:text-red-600 text-lg font-bold"
-                    >
-                      ✕
-                    </button>
+                    <div className="flex justify-end mt-3">
+                      <button
+                        onClick={() => deleteInfraction(idx)}
+                        className="text-red-400 hover:text-red-600 text-sm font-bold"
+                      >
+                        ✕ Delete
+                      </button>
+                    </div>
                   )}
 
                   <div className="flex justify-between">
