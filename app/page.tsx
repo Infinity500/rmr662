@@ -8,27 +8,47 @@ type Department = {
   points: number;
 };
 
+type Infraction = {
+  department: string;
+  points: number;
+  description: string;
+  date: number;
+};
+
 export default function Home() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [infractions, setInfractions] = useState<Infraction[]>([]);
   const [loading, setLoading] = useState(true);
   const [customAmount, setCustomAmount] = useState<Record<string, string>>({});
-  const [customDescription, setCustomDescription] = useState<
-    Record<string, string>
-  >({});
+  const [customDescription, setCustomDescription] = useState<Record<string, string>>({});
 
+  // Load leaderboard + infractions
   useEffect(() => {
     const load = async () => {
       const res = await fetch("/api/leaderboard");
       const data = await res.json();
-      setDepartments(data.departments);
+
+      if (!data || !Array.isArray(data.departments)) {
+        console.error("Invalid leaderboard data:", data);
+        setDepartments([]);
+      } else {
+        setDepartments(data.departments);
+      }
+
+      const infra = await fetch("/api/infractions").then((r) => r.json());
+      if (infra && Array.isArray(infra.infractions)) {
+        setInfractions(infra.infractions.reverse()); // newest first
+      }
+
       setLoading(false);
     };
+
     load();
   }, []);
 
-  // 🔐 Secure sync — sends password to server
+  // Sync leaderboard
   const sync = async (updated: Department[]) => {
     setDepartments(updated);
 
@@ -42,30 +62,30 @@ export default function Home() {
     });
   };
 
-  // 🔥 Apply change + log infraction
-  const applyChange = async (
-    index: number,
-    amount: number,
-    description: string
-  ) => {
+  // Apply change + log infraction
+  const applyChange = async (index: number, amount: number, description: string) => {
     const updated = [...departments];
     updated[index].points += amount;
     updated.sort((a, b) => b.points - a.points);
 
-    // Update leaderboard
     await sync(updated);
 
-    // Log infraction
     await fetch("/api/infractions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        department: departments[index].name,
+        department: updated[index].name,
         points: amount,
         description,
         password: passwordInput,
       }),
     });
+
+    // Refresh infractions list
+    const infra = await fetch("/api/infractions").then((r) => r.json());
+    if (infra && Array.isArray(infra.infractions)) {
+      setInfractions(infra.infractions.reverse());
+    }
   };
 
   const handleCustom = (dept: string, index: number) => {
@@ -83,7 +103,7 @@ export default function Home() {
     setCustomDescription((p) => ({ ...p, [dept]: "" }));
   };
 
-  // 🔐 Secure login — validated by server
+  // Admin login
   const handleLogin = async () => {
     const res = await fetch("/api/leaderboard", {
       method: "POST",
@@ -113,46 +133,28 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-950 via-black to-yellow-900 text-white p-6 sm:p-10 relative">
 
-      {/* ---------- FIXED SIDEBAR (Right) ---------- */}
+      {/* ---------- FIXED SIDEBAR ---------- */}
       <aside className="hidden lg:block fixed right-6 top-24 w-80 bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl shadow-2xl">
-        <h3 className="text-xl font-semibold mb-4 text-yellow-400">
-          Safety Infraction Key
-        </h3>
+        <h3 className="text-xl font-semibold mb-4 text-yellow-400">Safety Infraction Key</h3>
 
         <ul className="space-y-3 text-sm">
           <li className="flex justify-between border-b border-white/10 pb-2">
-            <span>No safety glasses</span>
-            <span className="text-red-400 font-bold">-50</span>
+            <span>No safety glasses</span><span className="text-red-400 font-bold">-50</span>
           </li>
-
           <li className="flex justify-between border-b border-white/10 pb-2">
-            <span>Horseplay / unsafe behavior</span>
-            <span className="text-red-400 font-bold">-100</span>
+            <span>Horseplay / unsafe behavior</span><span className="text-red-400 font-bold">-100</span>
           </li>
-
           <li className="flex justify-between border-b border-white/10 pb-2">
-            <span>Improper tool use</span>
-            <span className="text-red-400 font-bold">-75</span>
+            <span>Improper tool use</span><span className="text-red-400 font-bold">-75</span>
           </li>
-
           <li className="flex justify-between border-b border-white/10 pb-2">
-            <span>Not cleaning workspace</span>
-            <span className="text-red-400 font-bold">-25</span>
+            <span>Not cleaning workspace</span><span className="text-red-400 font-bold">-25</span>
           </li>
-
           <li className="flex justify-between border-b border-white/10 pb-2">
-            <span>Missing PPE</span>
-            <span className="text-red-400 font-bold">-40</span>
+            <span>Missing PPE</span><span className="text-red-400 font-bold">-40</span>
           </li>
-
-          <li className="flex justify-between border-b border-white/10 pb-2">
-            <span>Unsafe robot operation</span>
-            <span className="text-red-400 font-bold">-100</span>
-          </li>
-
           <li className="flex justify-between">
-            <span>Custom infraction</span>
-            <span className="text-red-400 font-bold">Varies</span>
+            <span>Custom infraction</span><span className="text-red-400 font-bold">Varies</span>
           </li>
         </ul>
       </aside>
@@ -173,16 +175,12 @@ export default function Home() {
           <h1 className="text-4xl sm:text-5xl font-extrabold text-center bg-gradient-to-r from-yellow-400 to-blue-400 bg-clip-text text-transparent">
             Safety Leaderboard
           </h1>
-          <p className="text-zinc-400 mt-2">
-            Rocky Mountain Robotics Safety Tracking System
-          </p>
+          <p className="text-zinc-400 mt-2">Rocky Mountain Robotics Safety Tracking System</p>
         </div>
 
         {/* Leaderboard */}
         <div className="max-w-4xl mx-auto bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
-          <h2 className="text-2xl font-semibold mb-6 text-yellow-400">
-            Leaderboard
-          </h2>
+          <h2 className="text-2xl font-semibold mb-6 text-yellow-400">Leaderboard</h2>
 
           <div className="space-y-4">
             {departments.map((d, i) => (
@@ -197,9 +195,7 @@ export default function Home() {
                   <span className="text-lg font-medium">{d.name}</span>
                 </div>
 
-                <span className="text-yellow-300 text-xl font-bold">
-                  {d.points}
-                </span>
+                <span className="text-yellow-300 text-xl font-bold">{d.points}</span>
               </div>
             ))}
           </div>
@@ -208,9 +204,7 @@ export default function Home() {
         {/* Admin Login */}
         {!isAdmin && (
           <div className="max-w-md mx-auto mt-14 bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-2xl shadow-xl">
-            <h3 className="text-xl font-semibold mb-3 text-blue-400">
-              Admin Login
-            </h3>
+            <h3 className="text-xl font-semibold mb-3 text-blue-400">Admin Login</h3>
             <input
               type="password"
               className="w-full p-2 rounded bg-black/50 border border-white/20"
@@ -230,39 +224,18 @@ export default function Home() {
         {/* Admin Controls */}
         {isAdmin && (
           <div className="max-w-4xl mx-auto mt-14 bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
-            <h2 className="text-2xl font-semibold mb-6 text-blue-400">
-              Admin Controls
-            </h2>
+            <h2 className="text-2xl font-semibold mb-6 text-blue-400">Admin Controls</h2>
 
             {departments.map((dept, i) => (
-              <div
-                key={dept.name}
-                className="mb-6 border-b border-white/10 pb-6"
-              >
+              <div key={dept.name} className="mb-6 border-b border-white/10 pb-6">
                 <h3 className="text-lg font-medium mb-3">
-                  {dept.name} —{" "}
-                  <span className="text-yellow-400">{dept.points} pts</span>
+                  {dept.name} — <span className="text-yellow-400">{dept.points} pts</span>
                 </h3>
 
                 <div className="flex gap-2 mb-3 flex-wrap">
-                  <button
-                    onClick={() => applyChange(i, -50, "Minor incident")}
-                    className="bg-red-600 px-3 py-1 rounded text-sm"
-                  >
-                    -50
-                  </button>
-                  <button
-                    onClick={() => applyChange(i, -100, "Major incident")}
-                    className="bg-red-800 px-3 py-1 rounded text-sm"
-                  >
-                    -100
-                  </button>
-                  <button
-                    onClick={() => applyChange(i, 10, "Correct answer")}
-                    className="bg-green-600 px-3 py-1 rounded text-sm"
-                  >
-                    +10
-                  </button>
+                  <button onClick={() => applyChange(i, -50, "Minor incident")} className="bg-red-600 px-3 py-1 rounded text-sm">-50</button>
+                  <button onClick={() => applyChange(i, -100, "Major incident")} className="bg-red-800 px-3 py-1 rounded text-sm">-100</button>
+                  <button onClick={() => applyChange(i, 10, "Correct answer")} className="bg-green-600 px-3 py-1 rounded text-sm">+10</button>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2">
@@ -306,21 +279,35 @@ export default function Home() {
         <div className="max-w-5xl mx-auto mt-16">
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-semibold text-yellow-400">
-                Incident Log
-              </h2>
-              <span className="text-sm text-zinc-400">
-                Live Google Sheets Feed
-              </span>
+              <h2 className="text-2xl font-semibold text-yellow-400">Incident Log</h2>
+              <span className="text-sm text-zinc-400">Latest Safety Events</span>
             </div>
 
-            <div className="rounded-xl overflow-hidden border border-yellow-500/30 shadow-inner">
-              <iframe
-                src="https://docs.google.com/spreadsheets/d/e/2PACX-1vR-yD4WEKawoutTLeDBKS9oFg5TJNyAdm9HmOhtVEqyWhnTNFCbGu-hFNEQxFDoCiGAZTZ8MliuIqjn/pubhtml?widget=true&headers=false"
-                width="100%"
-                height="500"
-                className="bg-white"
-              />
+            <div className="space-y-4">
+              {infractions.length === 0 && (
+                <p className="text-zinc-400 text-center py-6">No incidents logged yet</p>
+              )}
+
+              {infractions.map((inf, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white/5 border border-white/10 p-4 rounded-xl shadow-sm hover:bg-white/10 transition"
+                >
+                  <div className="flex justify-between">
+                    <span className="font-semibold text-yellow-300">{inf.department}</span>
+                    <span className={inf.points < 0 ? "text-red-400" : "text-green-400"}>
+                      {inf.points > 0 ? "+" : ""}
+                      {inf.points}
+                    </span>
+                  </div>
+
+                  <p className="text-sm text-zinc-300 mt-1">{inf.description}</p>
+
+                  <p className="text-xs text-zinc-500 mt-2">
+                    {new Date(inf.date).toLocaleString()}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
