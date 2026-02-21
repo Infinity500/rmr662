@@ -24,6 +24,8 @@ export default function Home() {
   const [customAmount, setCustomAmount] = useState<Record<string, string>>({});
   const [customDescription, setCustomDescription] = useState<Record<string, string>>({});
 
+  const wait = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
   // Load leaderboard + infractions
   useEffect(() => {
     const load = async () => {
@@ -39,7 +41,7 @@ export default function Home() {
 
       const infra = await fetch("/api/infractions").then((r) => r.json());
       if (infra && Array.isArray(infra.infractions)) {
-        setInfractions(infra.infractions.reverse());
+        setInfractions([...infra.infractions].reverse());
       }
 
       setLoading(false);
@@ -81,10 +83,12 @@ export default function Home() {
       }),
     });
 
-    // Refresh infractions list
+    // Wait for blob write to finish
+    await wait(150);
+
     const infra = await fetch("/api/infractions").then((r) => r.json());
     if (infra && Array.isArray(infra.infractions)) {
-      setInfractions(infra.infractions.reverse());
+      setInfractions([...infra.infractions].reverse());
     }
   };
 
@@ -103,6 +107,7 @@ export default function Home() {
     setCustomDescription((p) => ({ ...p, [dept]: "" }));
   };
 
+  // Delete an incident
   const deleteInfraction = async (index: number) => {
     if (!confirm("Delete this incident?")) return;
 
@@ -115,9 +120,11 @@ export default function Home() {
       }),
     });
 
+    await wait(150);
+
     const infra = await fetch("/api/infractions").then((r) => r.json());
     if (infra && Array.isArray(infra.infractions)) {
-      setInfractions(infra.infractions.reverse());
+      setInfractions([...infra.infractions].reverse());
     }
   };
 
@@ -309,19 +316,8 @@ export default function Home() {
               {infractions.map((inf, idx) => (
                 <div
                   key={idx}
-                  className="relative bg-white/5 border border-white/10 p-4 rounded-xl shadow-sm hover:bg-white/10 transition"
+                  className="bg-white/5 border border-white/10 p-4 rounded-xl shadow-sm hover:bg-white/10 transition"
                 >
-                  {isAdmin && (
-                    <div className="flex justify-end mt-3">
-                      <button
-                        onClick={() => deleteInfraction(idx)}
-                        className="text-red-400 hover:text-red-600 text-sm font-bold"
-                      >
-                        ✕ Delete
-                      </button>
-                    </div>
-                  )}
-
                   <div className="flex justify-between">
                     <span className="font-semibold text-yellow-300">{inf.department}</span>
                     <span className={inf.points < 0 ? "text-red-400" : "text-green-400"}>
@@ -335,6 +331,18 @@ export default function Home() {
                   <p className="text-xs text-zinc-500 mt-2">
                     {new Date(inf.date).toLocaleString()}
                   </p>
+
+                  {/* Admin-only delete button at bottom */}
+                  {isAdmin && (
+                    <div className="flex justify-end mt-3">
+                      <button
+                        onClick={() => deleteInfraction(idx)}
+                        className="text-red-400 hover:text-red-600 text-sm font-bold"
+                      >
+                        ✕ Delete
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
