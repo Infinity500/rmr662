@@ -66,7 +66,7 @@ export default function Home() {
 
   // Apply change + log infraction
   const applyChange = async (index: number, amount: number, description: string) => {
-  const deptName = departments[index].name;   // ⭐ Capture BEFORE sorting
+  const deptName = departments[index].name;   //  Capture BEFORE sorting
 
   const updated = [...departments];
   updated[index].points += amount;
@@ -78,7 +78,7 @@ export default function Home() {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      department: deptName,   // ⭐ Use original department
+      department: deptName,   //  Use original department
       points: amount,
       description,
       password: passwordInput,
@@ -109,12 +109,13 @@ export default function Home() {
   // Delete an incident
   const deleteInfraction = async (index: number) => {
     if (!confirm("Delete this incident?")) return;
+    const originalIndex = infractions.length - 1 - index;
 
     await fetch("/api/infractions", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        index,
+        index: originalIndex,
         password: passwordInput,
       }),
     });
@@ -140,6 +141,11 @@ export default function Home() {
 
     if (res.status === 401) {
       alert("Wrong password");
+      return;
+    }
+
+    if (!res.ok) {
+      alert("Login failed. Check server configuration.");
       return;
     }
 
@@ -253,7 +259,7 @@ export default function Home() {
             {departments.map((dept, i) => (
               <div key={dept.name} className="mb-6 border-b border-white/10 pb-6">
                 <h3 className="text-lg font-medium mb-3">
-                  {dept.name} — <span className="text-yellow-400">{dept.points} pts</span>
+                  {dept.name} - <span className="text-yellow-400">{dept.points} pts</span>
                 </h3>
 
                 <div className="flex gap-2 mb-3 flex-wrap">
@@ -338,7 +344,7 @@ export default function Home() {
                         onClick={() => deleteInfraction(idx)}
                         className="text-red-400 hover:text-red-600 text-sm font-bold"
                       >
-                        ✕ Delete
+                        X Delete
                       </button>
                     </div>
                   )}
@@ -349,9 +355,10 @@ export default function Home() {
         </div>
 
         <footer className="text-center text-zinc-500 mt-16 text-sm">
-          © {new Date().getFullYear()} Rocky Mountain Robotics. All rights reserved.
+          (c) {new Date().getFullYear()} Rocky Mountain Robotics. All rights reserved.
         </footer>
       </div>
     </div>
   );
 }
+
